@@ -9,7 +9,9 @@ import br.com.ufma.str.utils.GenericMapper;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +21,7 @@ public class ContaService {
     private final ContaRepository contaRepository;
     private final TransacaoRepository transacaoRepository;
     private final GenericMapper genericMapper;
-    private static Map<DadosTransacaoDTO, Object> lock;
+    private static Map<DadosTransacaoDTO, Object> lock = new HashMap<>();
 
     public ContaService(ContaRepository contaRepository, TransacaoRepository transacaoRepository, GenericMapper genericMapper) {
         this.contaRepository = contaRepository;
@@ -38,9 +40,13 @@ public class ContaService {
         synchronized (getLock(dadosTransacao)){
             Transacao transacao = genericMapper.toObject(dto, Transacao.class);
             Conta conta = contaRepository.findById(idConta).orElseThrow();
+            BigDecimal saldoAtualizado = TransacaoEnum.ofId(dto.getTipoTransacao())
+                    .calcularTransacao(dto.getValorTransacao(), conta.getSaldo());
             transacao.setConta(conta);
             transacao.setDataTransacao(LocalDateTime.now());
             transacaoRepository.save(transacao);
+            conta.setSaldo(saldoAtualizado);
+            contaRepository.save(conta);
             return genericMapper.toObject(conta, ContaDtoOut.class);
         }
     }

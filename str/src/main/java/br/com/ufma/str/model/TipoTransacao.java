@@ -16,6 +16,13 @@ public class TipoTransacao {
     @Column(name = "DESC_TIPO_TRANSACAO", nullable = false)
     private String descricao;
 
+    public TipoTransacao(Long id) {
+        this.id = id;
+    }
+
+    public TipoTransacao() {
+    }
+
     public Long getId() {
         return id;
     }
