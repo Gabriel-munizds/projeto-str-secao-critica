@@ -7,10 +7,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "TRANSACAO")
 public class Transacao {
-    @Transient
-    private static final Long DEPOSITO = 1L;
-    @Transient
-    private static final Long SAQUE = 2L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

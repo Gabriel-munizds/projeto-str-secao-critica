@@ -5,6 +5,10 @@ import javax.persistence.*;
 @Entity
 @Table(name = "TIPO_TRANSACAO")
 public class TipoTransacao {
+    @Transient
+    private static final Long DEPOSITO = 1L;
+    @Transient
+    private static final Long SAQUE = 2L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_TIPO_TRANSACAO", nullable = false)
