@@ -1,6 +1,8 @@
 ### README
 
 # Projeto: Sistema de Transações Bancárias com Controle de Concorrência
+## Disciplina: Sistemas de Tempo Real - Engenharia da Computação (UFMA)
+## Alunos: João Gabriel Muniz da Silva e Pedro Lucas Correia
 
 ## Visão Geral
 
