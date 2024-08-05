@@ -23,7 +23,7 @@ public class ContaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(contaService.criarConta(dto));
     }
     @PostMapping("/transacao/{idConta}")
-    public ResponseEntity<ContaDtoOut> criarTransacao(@RequestBody TransacaoDtoIn dto, @PathVariable Long idConta){
+    public ResponseEntity<ContaDtoOut> criarTransacao(@RequestBody TransacaoDtoIn dto, @PathVariable Long idConta) throws InterruptedException {
         return ResponseEntity.status(HttpStatus.CREATED).body(contaService.criarTransacao(dto, idConta));
     }
     @GetMapping("/extrato/{idConta}")

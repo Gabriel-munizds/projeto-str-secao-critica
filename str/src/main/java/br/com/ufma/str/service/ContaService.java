@@ -6,6 +6,8 @@ import br.com.ufma.str.model.Transacao;
 import br.com.ufma.str.repository.ContaRepository;
 import br.com.ufma.str.repository.TransacaoRepository;
 import br.com.ufma.str.utils.GenericMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -17,7 +19,7 @@ import java.util.Map;
 
 @Service
 public class ContaService {
-
+    private final static Logger logger = LoggerFactory.getLogger(ContaService.class);
     private final ContaRepository contaRepository;
     private final TransacaoRepository transacaoRepository;
     private final GenericMapper genericMapper;
@@ -35,9 +37,12 @@ public class ContaService {
         return genericMapper.toObject(novaConta, ContaDtoOut.class);
     }
     @Transactional
-    public ContaDtoOut criarTransacao(TransacaoDtoIn dto, Long idConta) {
+    public ContaDtoOut criarTransacao(TransacaoDtoIn dto, Long idConta) throws InterruptedException {
         DadosTransacaoDTO dadosTransacao = new DadosTransacaoDTO(dto.getTipoTransacao(), idConta);
+        logger.info("Thread {} tentando criar transação para conta {}", Thread.currentThread().getName(), idConta);
         synchronized (getLock(dadosTransacao)){
+            Thread.sleep(10000);
+            logger.info("Thread {} entrou na seção crítica para conta {}", Thread.currentThread().getName(), idConta);
             Transacao transacao = genericMapper.toObject(dto, Transacao.class);
             Conta conta = contaRepository.findById(idConta).orElseThrow();
             BigDecimal saldoAtualizado = TransacaoEnum.ofId(dto.getTipoTransacao())
@@ -47,6 +52,7 @@ public class ContaService {
             transacaoRepository.save(transacao);
             conta.setSaldo(saldoAtualizado);
             contaRepository.save(conta);
+            logger.info("Thread {} concluiu a transação para conta {}", Thread.currentThread().getName(), idConta);
             return genericMapper.toObject(conta, ContaDtoOut.class);
         }
     }
