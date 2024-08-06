@@ -1,6 +1,7 @@
 package br.com.ufma.str.service;
 
 import br.com.ufma.str.dto.*;
+import br.com.ufma.str.exception.TempoEsgotadoException;
 import br.com.ufma.str.model.Conta;
 import br.com.ufma.str.model.Transacao;
 import br.com.ufma.str.repository.ContaRepository;
@@ -41,19 +42,23 @@ public class ContaService {
         DadosTransacaoDTO dadosTransacao = new DadosTransacaoDTO(dto.getTipoTransacao(), idConta);
         logger.info("Thread {} tentando criar transação para conta {}", Thread.currentThread().getName(), idConta);
         synchronized (getLock(dadosTransacao)){
-            Thread.sleep(10000);
-            logger.info("Thread {} entrou na seção crítica para conta {}", Thread.currentThread().getName(), idConta);
-            Transacao transacao = genericMapper.toObject(dto, Transacao.class);
-            Conta conta = contaRepository.findById(idConta).orElseThrow();
-            BigDecimal saldoAtualizado = TransacaoEnum.ofId(dto.getTipoTransacao())
-                    .calcularTransacao(dto.getValorTransacao(), conta.getSaldo());
-            transacao.setConta(conta);
-            transacao.setDataTransacao(LocalDateTime.now());
-            transacaoRepository.save(transacao);
-            conta.setSaldo(saldoAtualizado);
-            contaRepository.save(conta);
-            logger.info("Thread {} concluiu a transação para conta {}", Thread.currentThread().getName(), idConta);
-            return genericMapper.toObject(conta, ContaDtoOut.class);
+            try {
+                logger.info("Thread {} entrou na seção crítica para conta {}", Thread.currentThread().getName(), idConta);
+                Thread.sleep(10000);
+                Transacao transacao = genericMapper.toObject(dto, Transacao.class);
+                Conta conta = contaRepository.findById(idConta).orElseThrow();
+                BigDecimal saldoAtualizado = TransacaoEnum.ofId(dto.getTipoTransacao())
+                        .calcularTransacao(dto.getValorTransacao(), conta.getSaldo());
+                transacao.setConta(conta);
+                transacao.setDataTransacao(LocalDateTime.now());
+                transacaoRepository.save(transacao);
+                conta.setSaldo(saldoAtualizado);
+                contaRepository.save(conta);
+                logger.info("Thread {} concluiu a transação para conta {}", Thread.currentThread().getName(), idConta);
+                return genericMapper.toObject(conta, ContaDtoOut.class);
+            } catch (TempoEsgotadoException e){
+                throw new TempoEsgotadoException(e.getMessage());
+            }
         }
     }
 

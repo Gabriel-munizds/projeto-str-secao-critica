@@ -19,7 +19,6 @@ public class ConcorrenciaTeste {
     public void testConcurrentTransactions() throws InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(10);
         Long conta1 = 1L;
-        Long conta2 = 2L;
         for (int i = 0; i < 10; i++) {
             executor.submit(() -> {
                 try {
